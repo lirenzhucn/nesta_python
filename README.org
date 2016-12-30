@@ -1,11 +1,10 @@
-* l1magic in Python
-This is an attempt to migrate the infamous l1magic package
-(https://statweb.stanford.edu/~candes/l1magic/), which is originally implemented
+* NESTA in Python
+This is an attempt to migrate the NESTA package
+(https://statweb.stanford.edu/~candes/nesta/), which is originally implemented
 in MATLAB, to Python. My guess is this attempt will probably fail pretty soon,
 but I'd like to give it a try anyway.
 
 ** Plan
-   1. Migrate everything needed to make tvqc_logbarrier work
-   2. Migrate the example of solving a tvqc problem
-   3. Migrate l1qc_logbarrier
-   4. Migrate the example of solving a l1qc problem
+   1. Migrate everything needed to make TV denoising work
+   2. Migrate the example of solving a TV denoising problem
+   3. Something else...
