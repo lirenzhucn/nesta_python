@@ -9,6 +9,8 @@ Written by: Liren Zhu (liren.zhu.cn@gmail.com)
 Created: December 2016
 """
 
+import numpy as np
+
 
 class USV:
     """The object containing the SVD results of operator A."""
@@ -30,9 +32,9 @@ class NestaOptions:
         """Initialize the option object with default settings."""
         self.x0 = None
         self.type_min = 'l1'
-        self.W = None
+        self.W = lambda x: x
         self.Wt = None
-        self.norm_W = None
+        self.norm_W = 1.0
         self.cont_iter = 5
         self.max_iter = 1000
         self.tol = 1e-7
@@ -46,6 +48,30 @@ class NestaOptions:
            self.type_min.lower() not in self.VALID_TYPE_MIN:
             return False
         return True
+
+
+def validate_nesta_inputs(A, At, b, mu_f, delta, opts):
+    # validate opts
+    if not opts.validate():
+        raise Exception('opts is not valid')
+    # validate observation b
+    if not isinstance(b, np.ndarray) or b.ndim != 1:
+        raise Exception('b must be 1D vector')
+    # validate operators
+    if not isinstance(A, np.ndarray) and At is None:
+        raise Exception('Must provide At if A is not an array')
+    if opts.USV.U is None or opts.USV.S is None or opts.USV.V is None:
+        z = np.random.rand(b.shape[0])
+        if isinstance(A, np.ndarray):
+            AAtz = A(At(z))
+        else:
+            AAtz = np.dot(A, np.dot(A.T, z))
+        if np.linalg.norm(AAtz - z) / np.linalg.norm(z) > 1e-8:
+            raise Exception('Observation matrix A must follow: A@At = I')
+
+
+def val_mu_tv2d(x):
+    pass
 
 
 def nesta(A, At, b, mu_f, delta, opts):
@@ -106,3 +132,23 @@ def nesta(A, At, b, mu_f, delta, opts):
     res      - a vector containing the residuals at each step.
     f_mu     - a vector of values of f_mu at each step.
     """
+    if not isinstance(opts, NestaOptions):
+        raise Exception('opts must be an instance of NestaOptions')
+    # validate inputs
+    try:
+        validate_nesta_inputs(A, At, b, mu_f, delta, opts)
+    except e:
+        raise e
+    # find an initial guess if not provided
+    if not opts.x0:
+        # TODO: implement a default pseudo-inverse with USV
+        raise Exception('pseudo-inverse with SVD results not implemented yet.')
+    x_ref = opts.x0
+    if isinstance(opts.W, np.ndarray):
+        Wx_ref = np.dot(opts.W, x_ref)
+    else:
+        Wx_ref = opts.W(x_ref)
+    if opts.type_min.lower() == 'l1':
+        mu0 = 0.9 * np.max(np.abs(Wx_ref))
+    elif opts.type_min.lower() == 'tv':
+        mu0 = val_mu_tv(Wx_ref)
