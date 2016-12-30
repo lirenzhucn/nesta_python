@@ -10,6 +10,44 @@ Created: December 2016
 """
 
 
+class USV:
+    """The object containing the SVD results of operator A."""
+
+    def __init__(self, U, S, V):
+        self.U = U
+        self.S = S
+        self.V = V
+
+
+class NestaOptions:
+    """The object containing options used for the NESTA solver.
+    See the documentation of the *nesta* function for details.
+    """
+
+    VALID_TYPE_MIN = ['l1', 'tv']
+
+    def __init__(self):
+        """Initialize the option object with default settings."""
+        self.x0 = None
+        self.type_min = 'l1'
+        self.W = None
+        self.Wt = None
+        self.norm_W = None
+        self.cont_iter = 5
+        self.max_iter = 1000
+        self.tol = 1e-7
+        self.stop_test = 1
+        self.USV = USV(None, None, None)
+        self.verbose = False
+
+    def validate(self):
+        """Validate the option object."""
+        if not self.type_min or \
+           self.type_min.lower() not in self.VALID_TYPE_MIN:
+            return False
+        return True
+
+
 def nesta(A, At, b, mu_f, delta, opts):
     """Solve a L1/TV minimization problem under a quadratic constraint using
     the Nesterov algorithm, with continuation:
@@ -43,20 +81,21 @@ def nesta(A, At, b, mu_f, delta, opts):
                field names:
                x0        - the initial guess for the primal prox-function, and
                            also the initial point for x_k. Default: x0 = At(b).
+               type_min  - 'l1' or 'tv', the type of objective function used.
                W         - the analysis operator (a matrix or a callable).
                Wt        - the synthesis operator (a callable, ignored if given
                            W).
-               type_min  - 'l1' or 'tv', the type of objective function used.
                norm_W    - the operator norm of W; required if W is provided.
                cont_iter - number of continuation steps. Default: 5.
                max_iter  - max number of iterations in an inner loop.
-                           Default: 10,000
-               tol       - tolerance for the stopping criteria
+                           Default: 1,000
+               tol       - tolerance for the stopping criteria. Default: 1e-7
                stop_test - the stopping criteria:
                            1: relative change of the objective function.
                            2: l_infinity norm of difference in x_k.
                USV       - An object containing fields U, S, and V, which are
-                           the results of the SVD of A.
+                           the results of the SVD of A. U and V are matrices
+                           and S is a vector.
                verbose   - if true, more information will be displayed.
 
     ========================================================================
