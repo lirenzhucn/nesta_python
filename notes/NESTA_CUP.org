@@ -1,6 +1,11 @@
 #+title: Accelerating CUP reconstruction using NESTA optimization algorithm
 #+author: Liren Zhu
 
+#+latex_header: \usepackage{algorithm}
+#+latex_header: \usepackage{listings}
+#+latex_header: \newcommand{\norm}[2][2]{\ensuremath{\lVert #2 \rVert_{#1}}}
+#+latex_header: \newcommand{\normtv}[1]{\ensuremath{\lVert #1 \rVert_\text{TV}}}
+
 #+begin_abstract
 This is a summary of theoretical and algorithmic results that are related with
 using the NESTA algorithm in CUP reconstruction. The motivation of using NESTA
@@ -31,14 +36,12 @@ understand the implementation of this method.
   minimization problem
   #+name: eq1
   \begin{equation}
-  \min_x \frac{1}{2} \lVert b - Ax \rVert_2^2 + \lambda \lVert x
-  \rVert_{\text{TV}}
+  \min_x \frac{1}{2}\norm{b - Ax}^2 + \lambda\normtv{x}
   \end{equation}
   NESTA solves the following, more direct problem
   #+name: eq2
   \begin{equation}
-  \min_x \lVert x \rVert_{\text{TV}} \quad \text{s.t.} \lVert b - Ax \rVert_2
-  \le \epsilon
+  \min_x \normtv{x} \quad \text{s.t.}~ \norm{b - Ax} \le \epsilon
   \end{equation}
   While Eq. ([[eq1]]) has a rather arbitrary parameter $\lambda$, Eq. ([[eq2]]) requires
   a parameter $\epsilon$, which is closely related with the upper bound of the
@@ -48,4 +51,14 @@ understand the implementation of this method.
   in both problems.
 
 * The NESTA framework
-  Based on the technical report available at 
+  Based on the technical report available at [[https://statweb.stanford.edu/~candes/nesta/][this website]], the NESTA algorithm
+  can be laid out as the following steps:
+  \begin{algorithm}
+  \caption{General purpose NESTA solver}
+  \label{alg:nesta_framework}
+  \begin{lstlisting}[mathescape, escapeinside='']
+    'Compute $\nabla f(x_k)$.'
+    'Compute $y_k$:'
+        '$y_k = \arg \min_{x\in Q_P} \frac{L}{2} \norm{x-x_k}^2$'
+  \end{lstlisting}
+  \end{algorithm}
