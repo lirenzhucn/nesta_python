@@ -46,3 +46,6 @@ understand the implementation of this method.
   have shown that Eq. ([[eq1]]) and ([[eq2]]) are equivalent when $\lambda$ and
   $\epsilon$ follow a certain relation and the true optimal points were reached
   in both problems.
+
+* The NESTA framework
+  Based on the technical report available at 
